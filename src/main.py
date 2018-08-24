@@ -6,9 +6,10 @@ import sys
 import pickle
 
 from keras.models import Model
-from keras.layers import Input, Dense, Reshape, dot
+from keras.layers import Input, Dense, Reshape, dot, Flatten
 from keras.layers.embeddings import Embedding
 
+import keras.backend as K
 
 class SimilarityCallback:
     def __init__(self, rev_dict, valid_size, valid_examples, vocab_size, validation_model):
@@ -69,8 +70,11 @@ if __name__ == "__main__":
     #  ---------------------------
     #  ------- KERAS
     #  ---------------------------
-    input_target = Input((1,))
-    input_context = Input((1,))
+    batch_size = 64
+
+
+    input_target = Input(shape=(1,), batch_shape=(batch_size, 1))
+    input_context = Input(shape=(1,), batch_shape=(batch_size, 1))
 
     embedding_size = 300
     embedding = Embedding(vocabulary_size, embedding_size, input_length=1, name='embedding')
@@ -83,13 +87,12 @@ if __name__ == "__main__":
 
     # setup a cosine similarity operation which will be output in a secondary model
     similarity = dot([target, context], axes=1, normalize=True)
+    similarity = Flatten()(similarity)
 
     # now perform the dot product operation to get a similarity measure
-
-    dot_product = dot([target, context], axes=1, normalize=False)
-
-
-    dot_product = Reshape((1,))(dot_product)
+    dot_product = dot([target, context], axes=1)
+    dot_product = Flatten()(dot_product)
+    # dot_product = Reshape((2,))(dot_product)
     # add the sigmoid output layer
     output = Dense(1, activation='sigmoid')(dot_product)
 
@@ -116,14 +119,15 @@ if __name__ == "__main__":
     #  ---------------------------
     epochs = 1000000
 
-    arr_1 = np.zeros((1,))
-    arr_2 = np.zeros((1,))
-    arr_3 = np.zeros((1,))
+    arr_1 = np.zeros((batch_size, ))
+    arr_2 = np.zeros((batch_size, ))
+    arr_3 = np.zeros((batch_size, ))
+    l = np.array(labels)
     for cnt in range(epochs):
-        idx = np.random.randint(0, len(labels) - 1)
-        arr_1[0, ] = word_target[idx]
-        arr_2[0, ] = word_context[idx]
-        arr_3[0, ] = labels[idx]
+        idx = np.random.randint(0, len(labels) - 1, batch_size)
+        arr_1[0:batch_size, ] = word_target[idx]
+        arr_2[0:batch_size, ] = word_context[idx]
+        arr_3[0:batch_size, ] = l[idx]
         loss = model.train_on_batch([arr_1, arr_2], arr_3)
         if cnt % 100 == 0:
             print("Iteration {}, loss={}".format(cnt, loss))
