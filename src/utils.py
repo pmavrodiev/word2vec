@@ -6,6 +6,7 @@ import collections
 import pickle
 import numpy as np
 import keras
+import tensorflow as tf
 
 
 def maybe_download(filename_path, url, expected_bytes):
@@ -26,8 +27,8 @@ def maybe_download(filename_path, url, expected_bytes):
 def read_data(filename):
     # Extract the first file enclosed in a zip file as a list of words.
     with zipfile.ZipFile(filename) as f:
-        # data = tf.compat.as_str(f.read(f.namelist()[0])).split()
-        data = str(f.read(f.namelist()[0])).split()
+        data = tf.compat.as_str(f.read(f.namelist()[0])).split()
+
     return data
 
 
