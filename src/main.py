@@ -114,7 +114,7 @@ if __name__ == "__main__":
     #  ---------------------------
     #  ------- TRAINING LOOP
     #  ---------------------------
-    epochs = 10000
+    epochs = 1000000
 
     arr_1 = np.zeros((1,))
     arr_2 = np.zeros((1,))
@@ -125,9 +125,9 @@ if __name__ == "__main__":
         arr_2[0, ] = word_context[idx]
         arr_3[0, ] = labels[idx]
         loss = model.train_on_batch([arr_1, arr_2], arr_3)
-        if cnt % 10 == 0:
+        if cnt % 100 == 0:
             print("Iteration {}, loss={}".format(cnt, loss))
-        if cnt % 1000 == 0:
+        if cnt % 10000 == 0:
             sim_cb.run_sim()
 
     print("HOHO")
