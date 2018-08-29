@@ -2,12 +2,14 @@ import utils
 import numpy as np
 
 import os
+import os.path
 import sys
 import pickle
 
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.layers import Input, Dense, Reshape, dot, Flatten
 from keras.layers.embeddings import Embedding
+from keras.callbacks import ModelCheckpoint
 
 import keras.backend as K
 
@@ -123,12 +125,18 @@ if __name__ == "__main__":
     arr_2 = np.zeros((batch_size, ))
     arr_3 = np.zeros((batch_size, ))
     l = np.array(labels)
+    best_loss = np.inf
+
     for cnt in range(epochs):
         idx = np.random.randint(0, len(labels) - 1, batch_size)
         arr_1[0:batch_size, ] = word_target[idx]
         arr_2[0:batch_size, ] = word_context[idx]
         arr_3[0:batch_size, ] = l[idx]
         loss = model.train_on_batch([arr_1, arr_2], arr_3)
+        if loss < best_loss:
+            best_loss = loss
+            model.save('best_model.h5')
+            validation_model.save('best_validation.h5')
         if cnt % 100 == 0:
             print("Iteration {}, loss={}".format(cnt, loss))
         if cnt % 10000 == 0:
