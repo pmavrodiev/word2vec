@@ -75,8 +75,8 @@ if __name__ == "__main__":
     batch_size = 64
 
 
-    input_target = Input(shape=(1,), batch_shape=(batch_size, 1))
-    input_context = Input(shape=(1,), batch_shape=(batch_size, 1))
+    input_target = Input(shape=(1,), batch_shape=(batch_size, 1), name="input_train")
+    input_context = Input(shape=(1,), batch_shape=(batch_size, 1), name="input_context")
 
     embedding_size = 300
     embedding = Embedding(vocabulary_size, embedding_size, input_length=1, name='embedding')
